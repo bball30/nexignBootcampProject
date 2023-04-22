@@ -1,9 +1,14 @@
 package ru.bootcamp.brt.model.enums;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public enum TariffType {
     UNLIMITED("06"),
     MINUTE("03"),
-    ORDINARY("11");
+    CLASSIC("11");
 
     private final String stringTariffType;
 
@@ -21,13 +26,18 @@ public enum TariffType {
                 tariffType = MINUTE;
                 break;
             case "11":
-                tariffType = ORDINARY;
+                tariffType = CLASSIC;
                 break;
             default:
                 throw new IllegalStateException("Такого тарифа нет в базе: " + inputTariffType);
         }
         return tariffType;
         
+    }
+
+    public static List<String> getStringTypes() {
+        return Arrays.stream(TariffType.values()).map(t -> t.stringTariffType)
+                .collect(Collectors.toList());
     }
 
 }

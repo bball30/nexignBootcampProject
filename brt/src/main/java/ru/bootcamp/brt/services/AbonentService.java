@@ -22,6 +22,7 @@ public class AbonentService {
 
     @Transactional
     public void addNewAbonent(AbonentNewDto abonentNewDto) throws InvalidDataException {
+        System.out.println(abonentNewDto);
         validateAbonentNewDto(abonentNewDto);
 
         Tariff tariff = tariffRepository.findTariffByTariffId(abonentNewDto.getTariff());
@@ -56,4 +57,6 @@ public class AbonentService {
 
         if (!isValid) throw new InvalidDataException(message.toString());
     }
+
+
 }
