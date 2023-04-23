@@ -6,4 +6,8 @@ import ru.bootcamp.brt.model.Abonent;
 
 @Repository
 public interface AbonentRepository extends JpaRepository<Abonent, Long> {
+
+    Boolean existsByTelNumber(String telNumber);
+
+    Abonent findByTelNumber(String telNumber);
 }

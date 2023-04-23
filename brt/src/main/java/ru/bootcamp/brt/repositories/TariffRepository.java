@@ -9,6 +9,6 @@ public interface TariffRepository extends JpaRepository<Tariff, Long> {
 
     Tariff findTariffByTariffId(String id);
 
-
+    Boolean existsByTariffId(String tariffId);
 
 }
