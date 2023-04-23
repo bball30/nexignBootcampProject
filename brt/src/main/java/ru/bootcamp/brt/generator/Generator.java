@@ -1,19 +1,36 @@
 package ru.bootcamp.brt.generator;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import ru.bootcamp.brt.model.Abonent;
 import ru.bootcamp.brt.model.Tariff;
+import ru.bootcamp.brt.repositories.AbonentRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 @Component
-public class Generator implements Generatable {
+public class Generator {
 
-    @Override
+    private final AbonentRepository abonentRepository;
+
+    private int monthCount = 0;
+
+    @Value("${generator.options.directoryPath}")
+    private String directoryPath; // Стандартная директория хранения отчетов
+
+    public Generator(AbonentRepository abonentRepository) {
+        this.abonentRepository = abonentRepository;
+    }
+
     public List<String> generateTelNumbers(Long n) {
         long phoneNumber = 79210043221L;
         List<String> phones = new ArrayList<>();
@@ -77,4 +94,89 @@ public class Generator implements Generatable {
         return abonentList;
     }
 
+    public File generateCdr() {
+        final List<String> typesOfCallList = List.of("01", "02");
+        List<String> phonesList = abonentRepository.findAll().stream()
+                .map(Abonent::getTelNumber).collect(Collectors.toList());
+
+        StringBuilder cdr = new StringBuilder();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        Random random = new Random();
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        try (BufferedWriter bufferedWriter = new BufferedWriter(
+                new FileWriter(
+                        String.format("%s/random_cdr.txt", directoryPath)
+                ))) {
+            for (String phoneNumber : phonesList) {
+                final LocalDateTime monthToStart = LocalDateTime.of(2023, 1, 1, 0, 0, 0)
+                        .plusMonths(monthCount);
+                LocalDateTime startTime = monthToStart.plusDays(random.nextInt(30))
+                        .plusHours(random.nextInt(24))
+                        .plusMinutes(random.nextInt(60))
+                        .plusSeconds(random.nextInt(60));
+                LocalDateTime endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(60);
+                String typeOfCall = typesOfCallList.get(random.nextInt(2));
+                cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
+                        .append(startTime.format(dateFormat)).append(",")
+                        .append(endTime.format(dateFormat)).append("\n");
+
+                for (int i = 0; i < 60; i++) {
+                    startTime = monthToStart.plusDays(random.nextInt(30))
+                            .plusHours(random.nextInt(24))
+                            .plusMinutes(random.nextInt(60))
+                            .plusSeconds(random.nextInt(60));
+                    endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(60);
+                    typeOfCall = typesOfCallList.get(random.nextInt(2));
+                    cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
+                            .append(startTime.format(dateFormat)).append(",")
+                            .append(endTime.format(dateFormat)).append("\n");
+                }
+            }
+            bufferedWriter.write(cdr.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        monthCount++;
+
+        return new File(String.format("%s/random_cdr.txt", directoryPath));
+    }
+
+    public File generateCdrPlus(Resource resource) throws IOException {
+        Map<String, Abonent> abonentMap = abonentRepository.findAll().stream()
+                .collect(Collectors.toMap(Abonent::getTelNumber, Function.identity()));
+
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        InputStream inputStream = resource.getInputStream();
+        String[] cdr = new BufferedReader(new InputStreamReader(inputStream))
+                .lines().parallel().collect(Collectors.joining("\n"))
+                .split("\n");
+
+        StringBuilder cdrPlus = new StringBuilder();
+
+        Arrays.stream(cdr).forEach(line -> {
+            String numberPhone = line.split(",")[1];
+            if (abonentMap.containsKey(numberPhone)) {
+                Abonent abonent = abonentMap.get(numberPhone);
+                if (abonent.getBalance() > 0) {
+                    cdrPlus.append(line).append(",").append(abonent.getTariff().getTariffId()).append("\n");
+                }
+            }
+        });
+
+        BufferedWriter writer = new BufferedWriter(
+                new FileWriter(
+                        String.format("%s/cdr_plus.txt", directoryPath)
+        ));
+        writer.write(cdrPlus.toString());
+
+        return new File(String.format("%s/cdr_plus.txt", directoryPath));
+    }
 }
