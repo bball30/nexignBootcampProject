@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CallDetails {
     private String callType;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private Duration duration;
+    private String startTime;
+    private String endTime;
+    private String duration;
     private Double cost;
 }

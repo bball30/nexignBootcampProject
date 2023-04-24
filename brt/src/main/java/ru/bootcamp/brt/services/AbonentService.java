@@ -14,6 +14,7 @@ import ru.bootcamp.brt.repositories.TariffRepository;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -160,6 +161,7 @@ public class AbonentService {
     public BillingResponseDto billing(List<BillingResponse> billingResponseList) {
 
         Map<String, List<CallDetails>> phoneNumbersCallDetailsMap = new HashMap<>();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         billingResponseList.forEach(billingResponse -> {
             if (!phoneNumbersCallDetailsMap.containsKey(billingResponse.getNumberPhone())) {
@@ -168,9 +170,9 @@ public class AbonentService {
             phoneNumbersCallDetailsMap.get(billingResponse.getNumberPhone())
                     .add(new CallDetails(
                             billingResponse.getCallType(),
-                            billingResponse.getStartTime(),
-                            billingResponse.getEndTime(),
-                            Duration.ofSeconds(billingResponse.getDuration()),
+                            billingResponse.getStartTime().format(dateFormat),
+                            billingResponse.getEndTime().format(dateFormat),
+                            getFormattedDuration(billingResponse.getDuration()),
                             billingResponse.getCost()
                     ));
         });
@@ -209,15 +211,14 @@ public class AbonentService {
         Abonent abonent = abonentRepository.findByTelNumber(numberPhone);
         List<CallDetails> payload = new ArrayList<>();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         billingResponseList.forEach(billingResponse -> {
             if (Objects.equals(billingResponse.getNumberPhone(), abonent.getTelNumber())) {
                 payload.add(new CallDetails(
                         billingResponse.getCallType(),
-                        LocalDateTime.parse(billingResponse.getStartTime().toString(), dateFormat),
-                        LocalDateTime.parse(billingResponse.getEndTime().toString(), dateFormat),
-                        Duration.ofSeconds(billingResponse.getDuration()),
+                        billingResponse.getStartTime().format(dateFormat),
+                        billingResponse.getEndTime().format(dateFormat),
+                        getFormattedDuration(billingResponse.getDuration()),
                         billingResponse.getCost()
                 ));
             }
@@ -235,5 +236,13 @@ public class AbonentService {
                 totalCost,
                 "rubles"
         );
+    }
+
+    private String getFormattedDuration(long durationInSeconds) {
+        Duration duration = Duration.ofSeconds(durationInSeconds);
+        LocalTime localTime = LocalTime.MIDNIGHT.plus(duration);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        return localTime.format(formatter);
     }
 }

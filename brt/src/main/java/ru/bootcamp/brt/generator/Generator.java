@@ -123,7 +123,7 @@ public class Generator {
                         .plusHours(random.nextInt(24))
                         .plusMinutes(random.nextInt(60))
                         .plusSeconds(random.nextInt(60));
-                LocalDateTime endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(60);
+                LocalDateTime endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(random.nextInt(60));
                 String typeOfCall = typesOfCallList.get(random.nextInt(2));
                 cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
                         .append(startTime.format(dateFormat)).append(",")
@@ -134,7 +134,7 @@ public class Generator {
                             .plusHours(random.nextInt(24))
                             .plusMinutes(random.nextInt(60))
                             .plusSeconds(random.nextInt(60));
-                    endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(60);
+                    endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(random.nextInt(60));
                     typeOfCall = typesOfCallList.get(random.nextInt(2));
                     cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
                             .append(startTime.format(dateFormat)).append(",")
@@ -177,7 +177,7 @@ public class Generator {
             }
         });
 
-        log.info(cdrPlus.toString());
+        //log.info(cdrPlus.toString());
 
         try (BufferedWriter writer = new BufferedWriter(
                 new FileWriter(
