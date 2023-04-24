@@ -124,7 +124,7 @@ public class Generator {
                         .append(startTime.format(dateFormat)).append(",")
                         .append(endTime.format(dateFormat)).append("\n");
 
-                for (int i = 0; i < 60; i++) {
+                for (int i = 0; i < 5; i++) {
                     startTime = monthToStart.plusDays(random.nextInt(30))
                             .plusHours(random.nextInt(24))
                             .plusMinutes(random.nextInt(60))
@@ -166,7 +166,7 @@ public class Generator {
             if (abonentMap.containsKey(numberPhone)) {
                 Abonent abonent = abonentMap.get(numberPhone);
                 if (abonent.getBalance() > 0) {
-                    cdrPlus.append(line).append(",").append(abonent.getTariff().getTariffId()).append("\n");
+                    cdrPlus.append(line).append(appendTariffDetails(abonent.getTariff()));
                 }
             }
         });
@@ -178,5 +178,17 @@ public class Generator {
         writer.write(cdrPlus.toString());
 
         return new File(String.format("%s/cdr_plus.txt", directoryPath));
+    }
+
+    private String appendTariffDetails(Tariff tariff) {
+        return "," + tariff.getTariffId() +
+                "," + tariff.getFixedPrice() +
+                "," + tariff.getFixedIncludedMinutes() +
+                "," + tariff.getIncludedPriceForMinute() +
+                "," + tariff.getPriceForMinute() +
+                "," + tariff.getIncomingPaid() +
+                "," + tariff.getOutgoingPaid() +
+                "\n";
+
     }
 }

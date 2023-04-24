@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="hrs" />
         <module name="nexignBootcampProject" />
         <module name="brt" />
         <module name="eureka" />
@@ -19,6 +20,7 @@
       <module name="brt" options="-parameters" />
       <module name="crm" options="-parameters" />
       <module name="eureka" options="-parameters" />
+      <module name="hrs" options="-parameters" />
     </option>
   </component>
 </project>
