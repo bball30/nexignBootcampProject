@@ -1,5 +1,9 @@
 package ru.bootcamp.brt.generator;
 
+import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
@@ -18,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 @Component
+@Slf4j
 public class Generator {
 
     private final AbonentRepository abonentRepository;
@@ -25,7 +30,7 @@ public class Generator {
     private int monthCount = 0;
 
     @Value("${generator.options.directoryPath}")
-    private String directoryPath; // Стандартная директория хранения отчетов
+    private String directoryPath;
 
     public Generator(AbonentRepository abonentRepository) {
         this.abonentRepository = abonentRepository;
@@ -83,7 +88,7 @@ public class Generator {
         for (String phoneNumber : phoneNumberList) {
             long lowerBound = -2000L;
             int range = 10000;
-            Long randomBalance = random.nextInt(range) + lowerBound;
+            float randomBalance = (float) random.nextInt(range) + lowerBound;
             Abonent abonent = new Abonent(
                     phoneNumber,
                     tariffList.get(random.nextInt(3)),
@@ -124,7 +129,7 @@ public class Generator {
                         .append(startTime.format(dateFormat)).append(",")
                         .append(endTime.format(dateFormat)).append("\n");
 
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 40; i++) {
                     startTime = monthToStart.plusDays(random.nextInt(30))
                             .plusHours(random.nextInt(24))
                             .plusMinutes(random.nextInt(60))
@@ -149,6 +154,7 @@ public class Generator {
         Map<String, Abonent> abonentMap = abonentRepository.findAll().stream()
                 .collect(Collectors.toMap(Abonent::getTelNumber, Function.identity()));
 
+        //log.debug(String.valueOf(abonentMap.size()));
         File directory = new File(directoryPath);
         if (!directory.exists()) {
             directory.mkdirs();
@@ -171,12 +177,14 @@ public class Generator {
             }
         });
 
-        BufferedWriter writer = new BufferedWriter(
+        log.info(cdrPlus.toString());
+
+        try (BufferedWriter writer = new BufferedWriter(
                 new FileWriter(
                         String.format("%s/cdr_plus.txt", directoryPath)
-        ));
-        writer.write(cdrPlus.toString());
-
+        ))) {
+            writer.write(cdrPlus.toString());
+        }
         return new File(String.format("%s/cdr_plus.txt", directoryPath));
     }
 

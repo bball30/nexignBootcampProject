@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Headers("Cache-Control: no-cache")
 @FeignClient(name = "brt")
 public interface BrtClient {
-    @GetMapping("/cdr/cdrPlus")
-    Resource cdrPlus();
+    @GetMapping("/cdr/randomCdrPlus")
+    Resource randomCdrPlus();
+
+    @GetMapping("/cdr/existedCdrPlus")
+    Resource existedCdrPlus();
 }

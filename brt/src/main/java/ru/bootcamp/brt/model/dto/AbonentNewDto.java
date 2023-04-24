@@ -19,6 +19,6 @@ public class AbonentNewDto {
     public AbonentNewDto(Abonent abonent) {
         this.numberPhone = abonent.getTelNumber();
         this.tariff_id = abonent.getTariff().getTariffId();
-        this.balance = abonent.getBalance().toString();
+        this.balance = String.valueOf(abonent.getBalance());
     }
 }

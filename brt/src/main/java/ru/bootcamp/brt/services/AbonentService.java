@@ -4,10 +4,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bootcamp.brt.exeptions.InvalidDataException;
 import ru.bootcamp.brt.model.Abonent;
+import ru.bootcamp.brt.model.BillingResponse;
+import ru.bootcamp.brt.model.CallDetails;
 import ru.bootcamp.brt.model.Tariff;
 import ru.bootcamp.brt.model.dto.*;
 import ru.bootcamp.brt.repositories.AbonentRepository;
 import ru.bootcamp.brt.repositories.TariffRepository;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AbonentService {
@@ -30,7 +39,7 @@ public class AbonentService {
         Abonent abonent = new Abonent(
                 abonentNewDto.getNumberPhone(),
                 tariff,
-                Long.parseLong(abonentNewDto.getBalance())
+                Double.parseDouble(abonentNewDto.getBalance())
         );
         abonentRepository.save(abonent);
 
@@ -76,7 +85,7 @@ public class AbonentService {
         AbonentResponseNewDto abonentResponseNewDto = new AbonentResponseNewDto(
                 abonent.getId().toString(),
                 abonent.getTelNumber(),
-                abonent.getBalance().toString()
+                String.valueOf(abonent.getBalance())
         );
 
         return abonentResponseNewDto;
@@ -145,5 +154,86 @@ public class AbonentService {
         }
 
         if (!isValid) throw new InvalidDataException(message.toString());
+    }
+
+    @Transactional
+    public BillingResponseDto billing(List<BillingResponse> billingResponseList) {
+
+        Map<String, List<CallDetails>> phoneNumbersCallDetailsMap = new HashMap<>();
+
+        billingResponseList.forEach(billingResponse -> {
+            if (!phoneNumbersCallDetailsMap.containsKey(billingResponse.getNumberPhone())) {
+                phoneNumbersCallDetailsMap.put(billingResponse.getNumberPhone(), new ArrayList<>());
+            }
+            phoneNumbersCallDetailsMap.get(billingResponse.getNumberPhone())
+                    .add(new CallDetails(
+                            billingResponse.getCallType(),
+                            billingResponse.getStartTime(),
+                            billingResponse.getEndTime(),
+                            Duration.ofSeconds(billingResponse.getDuration()),
+                            billingResponse.getCost()
+                    ));
+        });
+
+        List<Abonent> abonentList = abonentRepository.findAll();
+
+        abonentList.forEach(abonent -> {
+            if (phoneNumbersCallDetailsMap.containsKey(abonent.getTelNumber())) {
+                double totalCost = phoneNumbersCallDetailsMap.get(abonent.getTelNumber()).stream().mapToDouble(CallDetails::getCost).sum();
+                totalCost += abonent.getTariff().getFixedPrice();
+                abonent.setBalance(abonent.getBalance() - totalCost);
+                abonentRepository.save(abonent);
+            }
+        });
+
+        return new BillingResponseDto(
+                abonentList.stream()
+                        .filter(ab -> phoneNumbersCallDetailsMap.containsKey(ab.getTelNumber()))
+                        .map(ab -> new AbonentBalanceDto(
+                                ab.getTelNumber(),
+                                ab.getBalance()
+                        ))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    public ReportDto report(String numberPhone, List<BillingResponse> billingResponseList) throws InvalidDataException {
+        if (numberPhone == null || numberPhone.equals("")) {
+            throw new InvalidDataException("Номер телефона не может быть пустым! ");
+        } else if (numberPhone.length() != 11) {
+            throw new InvalidDataException("Некорректный номер телефона! ");
+        }
+        if (!abonentRepository.existsByTelNumber(numberPhone)) {
+            throw new InvalidDataException("Такой абонент не существует!");
+        }
+        Abonent abonent = abonentRepository.findByTelNumber(numberPhone);
+        List<CallDetails> payload = new ArrayList<>();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        billingResponseList.forEach(billingResponse -> {
+            if (Objects.equals(billingResponse.getNumberPhone(), abonent.getTelNumber())) {
+                payload.add(new CallDetails(
+                        billingResponse.getCallType(),
+                        LocalDateTime.parse(billingResponse.getStartTime().toString(), dateFormat),
+                        LocalDateTime.parse(billingResponse.getEndTime().toString(), dateFormat),
+                        Duration.ofSeconds(billingResponse.getDuration()),
+                        billingResponse.getCost()
+                ));
+            }
+        });
+
+        double totalCost = payload.stream().mapToDouble(CallDetails::getCost).sum();
+        //totalCost += abonent.getTariff().getFixedPrice();
+
+
+        return new ReportDto(
+                abonent.getId(),
+                abonent.getTelNumber(),
+                abonent.getTariff().getTariffId(),
+                payload,
+                totalCost,
+                "rubles"
+        );
     }
 }

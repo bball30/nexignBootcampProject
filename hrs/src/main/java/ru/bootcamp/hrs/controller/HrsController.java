@@ -21,7 +21,7 @@ public class HrsController {
 
     @GetMapping("/calculateCost")
     public List<BillingResponse> calculateCost() throws IOException {
-        Resource resource = brtClient.cdrPlus();
+        Resource resource = brtClient.existedCdrPlus();
         return billingService.calculateCost(resource);
     }
 }

@@ -26,9 +26,9 @@ public class Abonent {
     private Tariff tariff;
 
     @Column(name = "balance")
-    private Long balance;
+    private double balance;
 
-    public Abonent(String telNumber, Tariff tariff, Long balance) {
+    public Abonent(String telNumber, Tariff tariff, double balance) {
         this.telNumber = telNumber;
         this.tariff = tariff;
         this.balance = balance;

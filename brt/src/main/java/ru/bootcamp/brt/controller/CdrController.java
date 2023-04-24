@@ -1,6 +1,7 @@
 package ru.bootcamp.brt.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,9 +32,8 @@ public class CdrController {
         return resource;
     }
 
-    @GetMapping("/cdrPlus")
-    public Resource gen() throws IOException {
-
+    @GetMapping("/randomCdrPlus")
+    public Resource randomCdrPlus() throws IOException {
         File file = generator.generateCdrPlus(randomCdr());
         byte[] buffer = new byte[(int) file.length()];
 
@@ -44,4 +44,19 @@ public class CdrController {
         Resource resource = new ByteArrayResource(buffer);
         return resource;
     }
+
+    @GetMapping("/existedCdrPlus")
+    public Resource existedCdrPlus() throws IOException {
+        File file = new File("cdr_files/cdr_plus.txt");
+        byte[] buffer = new byte[(int) file.length()];
+
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            inputStream.read(buffer);
+        }
+
+        Resource resource = new ByteArrayResource(buffer);
+        return resource;
+    }
+
+
 }
