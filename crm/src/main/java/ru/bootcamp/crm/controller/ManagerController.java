@@ -7,6 +7,7 @@ import ru.bootcamp.crm.clients.BrtClient;
 import ru.bootcamp.crm.dto.AbonentNewDto;
 import ru.bootcamp.crm.dto.AbonentResponseTariffDto;
 import ru.bootcamp.crm.dto.BillingDto;
+import ru.bootcamp.crm.repositories.UserRepository;
 import ru.bootcamp.crm.requests.AbonentNewRequest;
 import ru.bootcamp.crm.requests.ChangeTariffRequest;
 
@@ -17,6 +18,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class ManagerController {
     BrtClient brtClient;
+    UserRepository userRepository;
 
     @PatchMapping(value = "/changeTariff", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AbonentResponseTariffDto changeTariff(
@@ -27,6 +29,7 @@ public class ManagerController {
     @PostMapping(value = "/abonent", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AbonentNewDto createClient(
             @RequestBody AbonentNewRequest abonentNewRequest) throws Exception {
+        userRepository.addUser(abonentNewRequest.getNumberPhone());
         return brtClient.createAbonent(abonentNewRequest);
     }
 

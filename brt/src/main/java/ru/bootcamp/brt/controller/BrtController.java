@@ -57,4 +57,9 @@ public class BrtController {
         List<BillingResponse> billingResponse = hrsClient.calculateCost();
         return abonentService.report(numberPhone, billingResponse);
     }
+
+    @GetMapping("/getAbonents")
+    public List<String> getAbonents() throws Exception {
+        return abonentService.getAbonents();
+    }
 }

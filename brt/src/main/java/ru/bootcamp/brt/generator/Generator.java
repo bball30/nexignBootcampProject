@@ -1,14 +1,10 @@
 package ru.bootcamp.brt.generator;
 
-import lombok.extern.log4j.Log4j;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+import ru.bootcamp.brt.exeptions.InvalidDataException;
 import ru.bootcamp.brt.model.Abonent;
 import ru.bootcamp.brt.model.Tariff;
 import ru.bootcamp.brt.repositories.AbonentRepository;
@@ -81,7 +77,18 @@ public class Generator {
                 true,
                 true
         );
-        final List<Tariff> tariffList = List.of(tariffUnlimited, tariffMinute, tariffClassic);
+        final Tariff tariffX = new Tariff(
+                "82",
+                "Тариф Х",
+                0L,
+                0L,
+                0f,
+                1.5f,
+                true,
+                true,
+                false
+        );
+        final List<Tariff> tariffList = List.of(tariffUnlimited, tariffMinute, tariffClassic, tariffX);
         final List<String> phoneNumberList = generateTelNumbers(n);
         List<Abonent> abonentList = new ArrayList<>();
 
@@ -89,10 +96,12 @@ public class Generator {
             long lowerBound = -2000L;
             int range = 10000;
             float randomBalance = (float) random.nextInt(range) + lowerBound;
+            boolean romashkaOperator = random.nextBoolean();
             Abonent abonent = new Abonent(
                     phoneNumber,
-                    tariffList.get(random.nextInt(3)),
-                    randomBalance
+                    tariffList.get(random.nextInt(4)),
+                    randomBalance,
+                    romashkaOperator
             );
             abonentList.add(abonent);
         }
@@ -117,6 +126,10 @@ public class Generator {
                         String.format("%s/random_cdr.txt", directoryPath)
                 ))) {
             for (String phoneNumber : phonesList) {
+                String callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
+                while (callingPhoneNumber.equals(phoneNumber)) {
+                    callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
+                }
                 final LocalDateTime monthToStart = LocalDateTime.of(2023, 1, 1, 0, 0, 0)
                         .plusMonths(monthCount);
                 LocalDateTime startTime = monthToStart.plusDays(random.nextInt(30))
@@ -126,10 +139,16 @@ public class Generator {
                 LocalDateTime endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(random.nextInt(60));
                 String typeOfCall = typesOfCallList.get(random.nextInt(2));
                 cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
+                        .append(callingPhoneNumber).append(",")
                         .append(startTime.format(dateFormat)).append(",")
                         .append(endTime.format(dateFormat)).append("\n");
 
-                for (int i = 0; i < 40; i++) {
+                int nCalls = 20 + random.nextInt(30);
+                for (int i = 0; i < nCalls; i++) {
+                    callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
+                    while (callingPhoneNumber.equals(phoneNumber)) {
+                        callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
+                    }
                     startTime = monthToStart.plusDays(random.nextInt(30))
                             .plusHours(random.nextInt(24))
                             .plusMinutes(random.nextInt(60))
@@ -137,6 +156,7 @@ public class Generator {
                     endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(random.nextInt(60));
                     typeOfCall = typesOfCallList.get(random.nextInt(2));
                     cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
+                            .append(callingPhoneNumber).append(",")
                             .append(startTime.format(dateFormat)).append(",")
                             .append(endTime.format(dateFormat)).append("\n");
                 }
@@ -169,10 +189,15 @@ public class Generator {
 
         Arrays.stream(cdr).forEach(line -> {
             String numberPhone = line.split(",")[1];
+            String callingNumberPhone = line.split(",")[2];
             if (abonentMap.containsKey(numberPhone)) {
                 Abonent abonent = abonentMap.get(numberPhone);
                 if (abonent.getBalance() > 0) {
-                    cdrPlus.append(line).append(appendTariffDetails(abonent.getTariff()));
+                    try {
+                        cdrPlus.append(line).append(appendTariffDetails(abonent.getTariff(), numberPhone, callingNumberPhone));
+                    } catch (InvalidDataException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -188,7 +213,11 @@ public class Generator {
         return new File(String.format("%s/cdr_plus.txt", directoryPath));
     }
 
-    private String appendTariffDetails(Tariff tariff) {
+    private String appendTariffDetails(Tariff tariff, String numberPhone, String callingNumberPhone) throws InvalidDataException {
+        Abonent abonent = abonentRepository.findByTelNumber(numberPhone);
+        Abonent callingAbonent = abonentRepository.findByTelNumber(callingNumberPhone);
+        if (abonent == null || callingAbonent == null) throw new InvalidDataException("Ошибка в cdr файле!");
+
         return "," + tariff.getTariffId() +
                 "," + tariff.getFixedPrice() +
                 "," + tariff.getFixedIncludedMinutes() +
@@ -196,7 +225,8 @@ public class Generator {
                 "," + tariff.getPriceForMinute() +
                 "," + tariff.getIncomingPaid() +
                 "," + tariff.getOutgoingPaid() +
+                "," + tariff.getInsideOperatorPaid() +
+                "," + (abonent.isRomashkaOperator() && callingAbonent.isRomashkaOperator()) +
                 "\n";
-
     }
 }

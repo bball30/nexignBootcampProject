@@ -1,7 +1,9 @@
-/*package ru.bootcamp.crm.config;
+package ru.bootcamp.crm.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -15,8 +17,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/abonent/**").hasAnyRole("USER", "ADMIN")
-                .anyRequest().hasRole("ADMIN")
+                .antMatchers("/brt/getAbonents").not().authenticated()
+                .antMatchers("/abonent/pay").hasRole("USER")
+                .antMatchers("/abonent/report/{numberPhone}")
+                    .access("@userService.checkUsername(authentication, #numberPhone)")
+                .antMatchers("/manager/**").hasRole("ADMIN")
                 .and()
                 .formLogin()
                 .and()
@@ -24,10 +29,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic();
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
-*/

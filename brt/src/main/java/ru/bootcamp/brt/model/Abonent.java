@@ -28,9 +28,13 @@ public class Abonent {
     @Column(name = "balance")
     private double balance;
 
-    public Abonent(String telNumber, Tariff tariff, double balance) {
+    @Column(name = "romashka_operator")
+    private boolean RomashkaOperator;
+
+    public Abonent(String telNumber, Tariff tariff, double balance, boolean romashkaOperator) {
         this.telNumber = telNumber;
         this.tariff = tariff;
         this.balance = balance;
+        this.RomashkaOperator = romashkaOperator;
     }
 }

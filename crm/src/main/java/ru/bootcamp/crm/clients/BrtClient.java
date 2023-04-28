@@ -10,6 +10,7 @@ import ru.bootcamp.crm.requests.ChangeTariffRequest;
 import ru.bootcamp.crm.requests.PayRequest;
 
 import java.io.IOException;
+import java.util.List;
 
 @Headers("Cache-Control: no-cache")
 @FeignClient(name = "brt")
@@ -33,4 +34,7 @@ public interface BrtClient {
     @PostMapping(value = "brt/abonent", consumes = MediaType.APPLICATION_JSON_VALUE)
     AbonentNewDto createAbonent(
             @RequestBody AbonentNewRequest abonentNewRequest) throws Exception;
+
+    @GetMapping(value = "brt/getAbonents", consumes = MediaType.APPLICATION_JSON_VALUE)
+    List<String> getAbonents() throws Exception;
 }

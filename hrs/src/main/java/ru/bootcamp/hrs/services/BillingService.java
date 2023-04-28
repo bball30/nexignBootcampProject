@@ -41,7 +41,8 @@ public class BillingService {
                 }
 
                 if ((!callDetails.getIncomingPaid() && callDetails.getCallType().equals("02"))
-                        || (!callDetails.getOutgoingPaid() && callDetails.getCallType().equals("01"))) {
+                        || (!callDetails.getOutgoingPaid() && callDetails.getCallType().equals("01"))
+                        || (!callDetails.getInsideOperatorPaid() && callDetails.getInsideOperatorCall())) {
                     responses.add(new BillingResponse(abonent.getKey(), callDetails.getCallType(),
                             callDetails.getTariffIndex(), callDetails.getStartTime(),
                             callDetails.getEndTime(), durationInSeconds, cost)
@@ -77,19 +78,21 @@ public class BillingService {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
         Arrays.stream(cdrPlus).forEach(line -> {
-            log.log(Level.INFO, line);
             String[] arguments = line.split(",");
             String callType = arguments[0];
             String numberPhone = arguments[1];
-            LocalDateTime startTime = LocalDateTime.parse(arguments[2].trim(), dateFormat);
-            LocalDateTime endTime = LocalDateTime.parse(arguments[3].trim(), dateFormat);
-            String tariffIndex = arguments[4];
-            Long fixedPrice = Long.parseLong(arguments[5]);
-            Long fixedIncludedMinutes = Long.parseLong(arguments[6]);
-            Float includedPriceForMinute = Float.parseFloat(arguments[7]);
-            Float priceForMinute = Float.parseFloat(arguments[8]);
-            boolean incomingPaid = Boolean.parseBoolean(arguments[9]);
-            boolean outgoingPaid = Boolean.parseBoolean(arguments[10]);
+            //String callingNumberPhone = arguments[2];
+            LocalDateTime startTime = LocalDateTime.parse(arguments[3].trim(), dateFormat);
+            LocalDateTime endTime = LocalDateTime.parse(arguments[4].trim(), dateFormat);
+            String tariffIndex = arguments[5];
+            Long fixedPrice = Long.parseLong(arguments[6]);
+            Long fixedIncludedMinutes = Long.parseLong(arguments[7]);
+            Float includedPriceForMinute = Float.parseFloat(arguments[8]);
+            Float priceForMinute = Float.parseFloat(arguments[9]);
+            boolean incomingPaid = Boolean.parseBoolean(arguments[10]);
+            boolean outgoingPaid = Boolean.parseBoolean(arguments[11]);
+            boolean insideOperatorPaid = Boolean.parseBoolean(arguments[12]);
+            boolean insideOperatorCall = Boolean.parseBoolean(arguments[13]);
 
             if (!abonentCallsMap.containsKey(numberPhone)) {
                 abonentCallsMap.put(numberPhone, new ArrayList<>());
@@ -97,7 +100,8 @@ public class BillingService {
 
             abonentCallsMap.get(numberPhone).add(new CallDetails(
                     callType, startTime, endTime, tariffIndex, fixedPrice, fixedIncludedMinutes,
-                    includedPriceForMinute, priceForMinute, incomingPaid, outgoingPaid
+                    includedPriceForMinute, priceForMinute, incomingPaid, outgoingPaid,
+                    insideOperatorPaid, insideOperatorCall
             ));
         });
         return abonentCallsMap;

@@ -18,4 +18,6 @@ public class CallDetails {
     private Float priceForMinute;
     private Boolean incomingPaid;
     private Boolean outgoingPaid;
+    private Boolean insideOperatorPaid;
+    private Boolean insideOperatorCall;
 }

@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AbonentNewDto {
 
-    private String telNumber;
+    private String numberPhone;
 
-    private String tariff;
+    private String tariff_id;
 
     private String balance;
 

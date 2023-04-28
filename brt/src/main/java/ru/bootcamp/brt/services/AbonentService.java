@@ -1,5 +1,6 @@
 package ru.bootcamp.brt.services;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bootcamp.brt.exeptions.InvalidDataException;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 public class AbonentService {
 
     private final AbonentRepository abonentRepository;
@@ -40,11 +42,16 @@ public class AbonentService {
         Abonent abonent = new Abonent(
                 abonentNewDto.getNumberPhone(),
                 tariff,
-                Double.parseDouble(abonentNewDto.getBalance())
+                Double.parseDouble(abonentNewDto.getBalance()),
+                true
         );
         abonentRepository.save(abonent);
 
-        return new AbonentNewDto(abonent);
+        return new AbonentNewDto(
+                abonent.getTelNumber(),
+                abonent.getTariff().getTariffId(),
+                String.valueOf(abonent.getBalance())
+        );
     }
 
     private void validateAbonentNewDto(AbonentNewDto abonentNewDto) throws InvalidDataException {
@@ -62,7 +69,7 @@ public class AbonentService {
             message.append("Тариф не может быть пустым! ");
             isValid = false;
         }
-        if (Long.parseLong(abonentNewDto.getBalance()) <= 0) {
+        if (Double.parseDouble(abonentNewDto.getBalance()) <= 0) {
             message.append("Баланс должен быть положительным! ");
             isValid = false;
         }
@@ -81,15 +88,14 @@ public class AbonentService {
             throw new InvalidDataException("Такой абонент не существует!");
         }
         Abonent abonent = abonentRepository.findByTelNumber(payDto.getNumberPhone());
-        abonent.setBalance(abonent.getBalance() + Long.parseLong(payDto.getMoney()));
+        abonent.setBalance(abonent.getBalance() + Double.parseDouble(payDto.getMoney()));
         abonentRepository.save(abonent);
-        AbonentResponseNewDto abonentResponseNewDto = new AbonentResponseNewDto(
+
+        return new AbonentResponseNewDto(
                 abonent.getId().toString(),
                 abonent.getTelNumber(),
                 String.valueOf(abonent.getBalance())
         );
-
-        return abonentResponseNewDto;
     }
 
     private void validatePayDto(PayDto payDto) throws InvalidDataException {
@@ -103,7 +109,7 @@ public class AbonentService {
             message.append("Сумма пополнения не может быть пустой! ");
             isValid = false;
         }
-        if (Long.parseLong(payDto.getMoney()) <= 0) {
+        if (Double.parseDouble(payDto.getMoney()) <= 0) {
             message.append("Сумма пополнения должна быть положительной! ");
             isValid = false;
         }
@@ -128,13 +134,11 @@ public class AbonentService {
         abonent.setTariff(tariffRepository.findTariffByTariffId(changeTariffDto.getTariff_id()));
         abonentRepository.save(abonent);
 
-        AbonentResponseTariffDto abonentResponseTariffDto = new AbonentResponseTariffDto(
+        return new AbonentResponseTariffDto(
                 abonent.getId().toString(),
                 abonent.getTelNumber(),
                 abonent.getTariff().getTariffId()
         );
-
-        return abonentResponseTariffDto;
     }
 
 
@@ -244,5 +248,9 @@ public class AbonentService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         return localTime.format(formatter);
+    }
+
+    public List<String> getAbonents() {
+        return abonentRepository.findAll().stream().map(Abonent::getTelNumber).collect(Collectors.toList());
     }
 }
