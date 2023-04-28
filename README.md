@@ -29,7 +29,7 @@ CDR принимает BRT (Billing Real Time). Получив данные из
 ## Особенности реализации
 
 ### Архитектура приложения:
-![](.\imgs\diagram.png)
+![](imgs/diagram.png)
 
 #### Использованные технологии: 
 Java 11, Spring (Boot, Data, Security, Cloud), PostgreSQL, Maven, Docker
