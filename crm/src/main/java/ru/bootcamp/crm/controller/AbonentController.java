@@ -10,6 +10,9 @@ import ru.bootcamp.crm.dto.AbonentResponseTariffDto;
 import ru.bootcamp.crm.dto.ReportDto;
 import ru.bootcamp.crm.requests.PayRequest;
 
+/**
+ * Контроллер команд абонента
+ */
 @RestController
 @RequestMapping("/abonent")
 @AllArgsConstructor

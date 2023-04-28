@@ -14,6 +14,9 @@ import ru.bootcamp.brt.services.AbonentService;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Контроллер пользовательских команд
+ */
 @AllArgsConstructor
 @RestController
 @RequestMapping("/brt")

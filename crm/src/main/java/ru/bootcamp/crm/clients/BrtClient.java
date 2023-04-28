@@ -12,6 +12,9 @@ import ru.bootcamp.crm.requests.PayRequest;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Клиент для взаимодействия с brt сервисом
+ */
 @Headers("Cache-Control: no-cache")
 @FeignClient(name = "brt")
 public interface BrtClient {

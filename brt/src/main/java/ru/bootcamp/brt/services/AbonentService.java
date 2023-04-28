@@ -167,6 +167,7 @@ public class AbonentService {
         Map<String, List<CallDetails>> phoneNumbersCallDetailsMap = new HashMap<>();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        // наполняем мапу информацией о звонках
         billingResponseList.forEach(billingResponse -> {
             if (!phoneNumbersCallDetailsMap.containsKey(billingResponse.getNumberPhone())) {
                 phoneNumbersCallDetailsMap.put(billingResponse.getNumberPhone(), new ArrayList<>());
@@ -185,6 +186,7 @@ public class AbonentService {
 
         abonentList.forEach(abonent -> {
             if (phoneNumbersCallDetailsMap.containsKey(abonent.getTelNumber())) {
+                // считаем суммарную стоимость всех звонков
                 double totalCost = phoneNumbersCallDetailsMap.get(abonent.getTelNumber()).stream().mapToDouble(CallDetails::getCost).sum();
                 totalCost += abonent.getTariff().getFixedPrice();
                 abonent.setBalance(abonent.getBalance() - totalCost);
@@ -216,6 +218,7 @@ public class AbonentService {
         List<CallDetails> payload = new ArrayList<>();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        // наполняем список информацией о звонках заданного абонента
         billingResponseList.forEach(billingResponse -> {
             if (Objects.equals(billingResponse.getNumberPhone(), abonent.getTelNumber())) {
                 payload.add(new CallDetails(

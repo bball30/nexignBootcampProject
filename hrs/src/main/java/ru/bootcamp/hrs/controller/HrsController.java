@@ -12,6 +12,9 @@ import ru.bootcamp.hrs.services.BillingService;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * контроллер запросов к hrs сервису
+ */
 @RestController
 @AllArgsConstructor
 @RequestMapping("/hrs")

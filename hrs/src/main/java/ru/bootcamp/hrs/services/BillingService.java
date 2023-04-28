@@ -40,6 +40,8 @@ public class BillingService {
                     durationInMinutes = durationInSeconds / 60 + 1;
                 }
 
+                // стоимость равна 0 при условии, что входящие или исходящие
+                // или звонки внутри операторов включены в тариф
                 if ((!callDetails.getIncomingPaid() && callDetails.getCallType().equals("02"))
                         || (!callDetails.getOutgoingPaid() && callDetails.getCallType().equals("01"))
                         || (!callDetails.getInsideOperatorPaid() && callDetails.getInsideOperatorCall())) {
@@ -50,6 +52,7 @@ public class BillingService {
                     continue;
                 }
 
+                // поминутно считываем стоимость звонка
                 while (durationInMinutes != 0) {
                     durationInMinutes--;
                     if (callDetails.getFixedIncludedMinutes() != 0) {
@@ -72,6 +75,11 @@ public class BillingService {
         return responses;
     }
 
+    /**
+     * Преобразование строк из cdr+ файла в мапу номер телефона -> список деталей звонков
+     * @param cdrPlus
+     * @return
+     */
     private Map<String, List<CallDetails>> getAbonentCallsListFromCdr(String[] cdrPlus) {
         Map<String, List<CallDetails>> abonentCallsMap = new HashMap<>();
 

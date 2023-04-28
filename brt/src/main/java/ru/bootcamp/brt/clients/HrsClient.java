@@ -7,6 +7,9 @@ import ru.bootcamp.brt.model.BillingResponse;
 
 import java.util.List;
 
+/**
+ * Клиент для взаимодействия с hrs сервисом
+ */
 @Headers("Cache-Control: no-cache")
 @FeignClient(name = "hrs")
 public interface HrsClient {

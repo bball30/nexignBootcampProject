@@ -32,6 +32,12 @@ public class Generator {
         this.abonentRepository = abonentRepository;
     }
 
+    /**
+     * генерирует рандомный список номеров телефонов
+     *
+     * @param n - количество номеров телефонов для генерации
+     * @return список рандомных номеров телефонов
+     */
     public List<String> generateTelNumbers(Long n) {
         long phoneNumber = 79210043221L;
         List<String> phones = new ArrayList<>();
@@ -42,6 +48,12 @@ public class Generator {
         return phones;
     }
 
+    /**
+     * Генерирует список рандомных абонентов
+     *
+     * @param n - количество абонентов для генерации
+     * @return список рандомных абонентов
+     */
     public List<Abonent> generateAbonents(Long n) {
         Random random = new Random();
         final Tariff tariffUnlimited = new Tariff(
@@ -95,6 +107,7 @@ public class Generator {
         for (String phoneNumber : phoneNumberList) {
             long lowerBound = -2000L;
             int range = 10000;
+            // баланс от -2000 до 8000
             float randomBalance = (float) random.nextInt(range) + lowerBound;
             boolean romashkaOperator = random.nextBoolean();
             Abonent abonent = new Abonent(
@@ -126,16 +139,21 @@ public class Generator {
                         String.format("%s/random_cdr.txt", directoryPath)
                 ))) {
             for (String phoneNumber : phonesList) {
+                // выбираем номер собеседника из существующих номеров
                 String callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
                 while (callingPhoneNumber.equals(phoneNumber)) {
                     callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
                 }
+                // 1.01.2023 - первый месяц разговоров
+                // далее - по месяцам вперед
                 final LocalDateTime monthToStart = LocalDateTime.of(2023, 1, 1, 0, 0, 0)
                         .plusMonths(monthCount);
+                // рандомный день и время в текущем месяце
                 LocalDateTime startTime = monthToStart.plusDays(random.nextInt(30))
                         .plusHours(random.nextInt(24))
                         .plusMinutes(random.nextInt(60))
                         .plusSeconds(random.nextInt(60));
+                // длина разговора случайная до 1 часа
                 LocalDateTime endTime = startTime.plusMinutes(random.nextInt(60)).plusSeconds(random.nextInt(60));
                 String typeOfCall = typesOfCallList.get(random.nextInt(2));
                 cdr.append(typeOfCall).append(",").append(phoneNumber).append(",")
@@ -143,6 +161,7 @@ public class Generator {
                         .append(startTime.format(dateFormat)).append(",")
                         .append(endTime.format(dateFormat)).append("\n");
 
+                // рандомное количество звонков от 20 до 50
                 int nCalls = 20 + random.nextInt(30);
                 for (int i = 0; i < nCalls; i++) {
                     callingPhoneNumber = phonesList.get(random.nextInt(phonesList.size()));
@@ -194,7 +213,8 @@ public class Generator {
                 Abonent abonent = abonentMap.get(numberPhone);
                 if (abonent.getBalance() > 0) {
                     try {
-                        cdrPlus.append(line).append(appendTariffDetails(abonent.getTariff(), numberPhone, callingNumberPhone));
+                        cdrPlus.append(line).append(appendTariffDetails(
+                                abonent.getTariff(), numberPhone, callingNumberPhone));
                     } catch (InvalidDataException e) {
                         e.printStackTrace();
                     }
@@ -213,6 +233,15 @@ public class Generator {
         return new File(String.format("%s/cdr_plus.txt", directoryPath));
     }
 
+    /**
+     * в cdr+ добавляем данные о тарифе
+     *
+     * @param tariff
+     * @param numberPhone
+     * @param callingNumberPhone
+     * @return
+     * @throws InvalidDataException
+     */
     private String appendTariffDetails(Tariff tariff, String numberPhone, String callingNumberPhone) throws InvalidDataException {
         Abonent abonent = abonentRepository.findByTelNumber(numberPhone);
         Abonent callingAbonent = abonentRepository.findByTelNumber(callingNumberPhone);

@@ -13,6 +13,9 @@ import ru.bootcamp.crm.requests.ChangeTariffRequest;
 
 import java.io.IOException;
 
+/**
+ * Контроллер команд менеджера
+ */
 @RestController
 @RequestMapping("/manager")
 @AllArgsConstructor

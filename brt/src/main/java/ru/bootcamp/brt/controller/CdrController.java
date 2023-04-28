@@ -13,6 +13,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+/**
+ * Контроллер для работы с cdr файлами
+ */
 @AllArgsConstructor
 @RestController
 @RequestMapping("/cdr")

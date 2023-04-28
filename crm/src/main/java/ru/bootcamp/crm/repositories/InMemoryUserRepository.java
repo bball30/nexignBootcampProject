@@ -21,17 +21,21 @@ public class InMemoryUserRepository implements UserRepository {
     private final Map<String, User> storage = new HashMap<>();
     private BrtClient brtClient;
 
+    /**
+     * Создаем юзеров
+     */
     @PostConstruct
     public void init() throws Exception {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         List<String> abonentsList = brtClient.getAbonents();
 
+        // Создаем юзеров для каждого абонента из базы данных
         for (String telNumber : abonentsList) {
-            storage.put(telNumber, new User(telNumber, encoder.encode("123"),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
+            addUser(telNumber);
         }
 
+        // Создаем 1 менеджера
         storage.put("admin", new User("admin", encoder.encode("admin"),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))));
     }

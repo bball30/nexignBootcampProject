@@ -22,6 +22,9 @@ public class DataInitializer implements ApplicationRunner {
     private Generator generator;
 
     @Override
+    /**
+     * добавляем случайных абонентов в базу клиентов
+     */
     public void run(ApplicationArguments args) throws Exception {
         Long abonentsAmount = 50L;
         List<Abonent> abonentList = generator.generateAbonents(abonentsAmount);
