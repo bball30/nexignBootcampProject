@@ -29,7 +29,7 @@ CDR принимает BRT (Billing Real Time). Получив данные из
 ## Особенности реализации
 
 ### Архитектура приложения:
-![](C:\Users\ASUS\Desktop\nexignBootcampProject\imgs\diagram.png)
+![](.\imgs\diagram.png)
 
 #### Использованные технологии: 
 Java 11, Spring (Boot, Data, Security, Cloud), PostgreSQL, Maven, Docker
@@ -55,6 +55,7 @@ Java 11, Spring (Boot, Data, Security, Cloud), PostgreSQL, Maven, Docker
 
 При инициализации сервиса он получает список всех номеров телефонов из базы данных (для этого он обращается к BRT) 
 и создает для каждого номера своего User с паролем `123`. Также создается 1 менеджер `admin:admin`
+Сервис работает на порту 9099
 
 ### Eureka:
 Сервис для регистрации всех микросервисов
