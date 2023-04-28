@@ -23,6 +23,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     /**
      * Создаем юзеров
+     * @throws Exception
      */
     @PostConstruct
     public void init() throws Exception {
@@ -32,7 +33,8 @@ public class InMemoryUserRepository implements UserRepository {
 
         // Создаем юзеров для каждого абонента из базы данных
         for (String telNumber : abonentsList) {
-            addUser(telNumber);
+            storage.put(telNumber, new User(telNumber, encoder.encode("123"),
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
         }
 
         // Создаем 1 менеджера

@@ -9,7 +9,7 @@
  * дата и время окончания звонка 
 
  * Вот пример готовой записи cdr:
- 02,79876543221,20230321160455,20230321163211
+` 02,79876543221,20230321160455,20230321163211`
  
 CDR принимает BRT (Billing Real Time). Получив данные из CDR BRT авторизует абонентов оператора "Ромашка",
 чей баланс больше 0. Для этого BRT связывается с базой клиентов, в которой есть информация об абоненте:
@@ -55,7 +55,7 @@ Java 11, Spring (Boot, Data, Security, Cloud), PostgreSQL, Maven, Docker
 
 При инициализации сервиса он получает список всех номеров телефонов из базы данных (для этого он обращается к BRT) 
 и создает для каждого номера своего User с паролем `123`. Также создается 1 менеджер `admin:admin`
-Сервис работает на порту 9099
+Сервис работает на порту `9099`
 
 ### Eureka:
 Сервис для регистрации всех микросервисов
@@ -63,6 +63,13 @@ Java 11, Spring (Boot, Data, Security, Cloud), PostgreSQL, Maven, Docker
 ### Postman коллекция:
 Демонстрирует работу приложения
 [Приглашение](https://app.getpostman.com/join-team?invite_code=1820a92a30889287b3e8109a72d38d4a&target_code=92b66b8b577dec47871ba48c68d29f94)
+Скриншоты из Postman:
+![](imgs/createAbonent.jpg)
+![](imgs/changeTariff.jpg)
+![](imgs/billing.jpg)
+![](imgs/pay.jpg)
+![](imgs/report1.jpg)
+![](imgs/report2.jpg)
 ### Swagger документация:
 `http://localhost:9099/swagger-ui/index.html`
 
