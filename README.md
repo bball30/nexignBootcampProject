@@ -63,13 +63,20 @@ Java 11, Spring (Boot, Data, Security, Cloud), PostgreSQL, Maven, Docker
 ### Postman коллекция:
 Демонстрирует работу приложения
 [Приглашение](https://app.getpostman.com/join-team?invite_code=1820a92a30889287b3e8109a72d38d4a&target_code=92b66b8b577dec47871ba48c68d29f94)
+
 Скриншоты из Postman:
 ![](imgs/createAbonent.jpg)
+# 
 ![](imgs/changeTariff.jpg)
+#
 ![](imgs/billing.jpg)
+# 
 ![](imgs/pay.jpg)
+# 
 ![](imgs/report1.jpg)
+# 
 ![](imgs/report2.jpg)
+# 
 ### Swagger документация:
 `http://localhost:9099/swagger-ui/index.html`
 
