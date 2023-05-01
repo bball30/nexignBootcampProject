@@ -1,7 +1,7 @@
 services:
-  postgres:
+  db:
     image: postgres:latest
-    container_name: nexign
+    container_name: nexign_postgres
     ports:
       - "5433:5432"
     environment:
@@ -11,3 +11,38 @@ services:
     restart: always
     volumes:
       - /var/lib/postgresql/data
+
+  eureka:
+    image: eureka:latest
+    ports:
+      - "8761:8761"
+
+  hrs:
+    image: hrs:latest
+    ports:
+      - "9091:9091"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka"
+
+  brt:
+    image: brt:latest
+    depends_on:
+      - db
+      - hrs
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/nexign"
+      SPRING_DATASOURCE_USERNAME: "postgres"
+      SPRING_DATASOURCE_PASSWORD: "postgres"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka"
+
+  crm:
+    image: crm:latest
+    depends_on:
+      - brt
+    ports:
+      - "9099:9099"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:8761/eureka"
+    restart: on-failure
